@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e1e1e">
+  <title>O-Utils</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/pwa/manifest.json">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/components.css">
+
+  <!-- Main Application Script (Module & Deferred) -->
+  <script type="module" src="/js/app.js" defer></script>
+</head>
+<body>
+
+  <!-- Main container where mode views will be dynamically mounted -->
+  <div id="app">
+    <!-- Initial state: A button to request permissions and start the app -->
+    <div id="start-overlay" class="container">
+      <button id="start-btn" class="btn btn-primary">Tap to Start</button>
+    </div>
+  </div>
+
+  <!-- Global UI Elements -->
+  <div id="toast"></div>
+  <div id="voice-control-container"></div>
+
+</body>
+</html>
