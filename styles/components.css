@@ -21,6 +21,12 @@
   padding: var(--space-md);
 }
 
+/* FIX: Added special style for landscape mode */
+.landscape-view {
+  display: flex;
+  gap: var(--space-md);
+}
+
 .view.active {
   opacity: 1;
   visibility: visible;

@@ -26,20 +26,24 @@ const debounce = (func, delay) => {
 
 /**
  * Determines the current orientation mode using the best available browser API.
- * @returns {string} The determined mode: "portrait-upright", "portrait-inverted", or "landscape".
+ * @returns {string} The determined mode: "portrait-primary", "portrait-secondary", "landscape-primary", or "landscape-secondary".
  */
 const determineMode = () => {
+  // The modern screen.orientation API is the only one that can reliably
+  // distinguish all four orientations.
   if (window.screen && window.screen.orientation && window.screen.orientation.type) {
-    const { type } = window.screen.orientation;
-    if (type.startsWith('landscape')) return 'landscape';
-    if (type === 'portrait-secondary') return 'portrait-inverted';
-    return 'portrait-upright';
+    return window.screen.orientation.type;
   }
+
+  // Fallbacks cannot distinguish between primary/secondary orientations.
   if (window.matchMedia) {
-    if (window.matchMedia('(orientation: landscape)').matches) return 'landscape';
-    return 'portrait-upright';
+    if (window.matchMedia('(orientation: landscape)').matches) {
+      return 'landscape-primary'; // Default to primary landscape
+    }
+    return 'portrait-primary'; // Default to primary portrait
   }
-  return window.innerHeight > window.innerWidth ? 'portrait-upright' : 'landscape';
+  
+  return window.innerHeight > window.innerWidth ? 'portrait-primary' : 'landscape-primary';
 };
 
 
@@ -61,8 +65,9 @@ const handleOrientationChange = () => {
  * @returns {Promise<boolean>} A promise that resolves to true if permission is granted, false otherwise.
  */
 export async function requestMotionPermission() {
-  if (typeof DeviceMotionEvent.requestPermission !== 'function') {
-    return true; // Not required on this device
+  // Check if DeviceMotionEvent exists before using it.
+  if (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function') {
+    return true; // Not required or not supported on this device/context.
   }
   try {
     const permissionState = await DeviceMotionEvent.requestPermission();

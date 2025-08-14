@@ -41,19 +41,21 @@ async function handleModeChange(mode) {
   let modulePromise;
   let toastMessage = '';
 
+  // FIX: Updated switch to handle four distinct modes
   switch (mode) {
-    case 'landscape':
-      modulePromise = Promise.all([
-        import('./modes/stopwatch.js'),
-        import('./modes/weather.js')
-      ]);
-      toastMessage = 'Landscape → Stopwatch & Weather';
+    case 'landscape-primary': // Phone rotated left
+      modulePromise = import('./modes/stopwatch.js');
+      toastMessage = 'Landscape (Right-Side Up) → Stopwatch';
       break;
-    case 'portrait-inverted':
+    case 'landscape-secondary': // Phone rotated right
+      modulePromise = import('./modes/weather.js');
+      toastMessage = 'Landscape (Left-Side Up) → Weather';
+      break;
+    case 'portrait-secondary': // Phone upside down
       modulePromise = import('./modes/timer.js');
       toastMessage = 'Upside Down → Timer';
       break;
-    case 'portrait-upright':
+    case 'portrait-primary': // Phone upright
     default:
       modulePromise = import('./modes/alarm.js');
       toastMessage = 'Portrait → Alarm';
@@ -61,25 +63,11 @@ async function handleModeChange(mode) {
   }
 
   try {
-    const modules = await modulePromise;
-    if (Array.isArray(modules)) {
-      // Handle landscape mode with two modules
-      const landscapeContainer = document.createElement('div');
-      landscapeContainer.style.display = 'flex';
-      landscapeContainer.style.width = '100%';
-      const stopwatchView = document.createElement('div');
-      const weatherView = document.createElement('div');
-      stopwatchView.style.flex = '1';
-      weatherView.style.flex = '1';
-      landscapeContainer.append(stopwatchView, weatherView);
-      view.append(landscapeContainer);
-      modules[0].mount(stopwatchView);
-      modules[1].mount(weatherView);
-      currentModule = { unmount: () => { modules[0].unmount(); modules[1].unmount(); } };
-    } else {
-      // Handle single module modes
-      modules.mount(view);
-      currentModule = modules;
+    // FIX: Simplified logic since we are always loading a single module now
+    const newModule = await modulePromise;
+    if (newModule && typeof newModule.mount === 'function') {
+        newModule.mount(view);
+        currentModule = newModule;
     }
     setTimeout(() => view.classList.add('active'), 50);
     showToast(toastMessage);
@@ -100,7 +88,7 @@ async function startApp() {
 
   // Register the service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/pwa/sw.js')
+    navigator.serviceWorker.register('./pwa/sw.js') // Use relative path
       .then(reg => console.log('Service Worker registered.', reg))
       .catch(err => console.error('Service Worker registration failed:', err));
   }
